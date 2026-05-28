@@ -1,53 +1,35 @@
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import streamlit as st
-import json
-import os
 
-# --- CONFIGURATION ---
-DATA_FILE = "tools.json"
+from lib.auth import require_login
+from lib.config import is_admin
+from lib.db import init_db
+from lib.routes import ADMIN_SCRIPT, GALLERY_SCRIPT, REGISTER_SCRIPT
+from lib.theme import apply_app_theme
 
-# --- DATA HELPER FUNCTIONS ---
-def load_tools():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, "r") as f:
-        return json.load(f)
+st.set_page_config(
+    page_title="NxtWave AI Tools Marketplace",
+    page_icon="🚀",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+apply_app_theme()
+init_db()
 
-def save_tools(tools):
-    with open(DATA_FILE, "w") as f:
-        json.dump(tools, f)
+user_email, user_name = require_login()
 
-# --- APP UI ---
-st.set_page_config(page_title="NxtWave AI Store", layout="wide")
-st.title("🚀 NxtWave AI App Store")
+gallery = st.Page(GALLERY_SCRIPT, title="Gallery", icon="🛍️", default=True)
+register = st.Page(REGISTER_SCRIPT, title="Register", icon="➕")
 
-# Initialize session state
-if "tools" not in st.session_state:
-    st.session_state.tools = load_tools()
+nav_pages = [gallery, register]
+if is_admin(user_email):
+    nav_pages.append(st.Page(ADMIN_SCRIPT, title="Admin", icon="🛠️"))
 
-# Sidebar: Add new tool
-with st.sidebar:
-    st.header("Register a New Tool")
-    with st.form("add_tool"):
-        name = st.text_input("Tool Name")
-        url = st.text_input("App URL")
-        desc = st.text_area("Description")
-        if st.form_submit_button("Add to Store"):
-            new_tool = {"name": name, "url": url, "desc": desc, "launches": 0}
-            st.session_state.tools.append(new_tool)
-            save_tools(st.session_state.tools)
-            st.success("Tool added!")
-
-# Main Area: Display tools
-st.subheader("Available AI Tools")
-cols = st.columns(3)
-
-for i, tool in enumerate(st.session_state.tools):
-    with cols[i % 3]:
-        st.markdown(f"### {tool['name']}")
-        st.write(tool['desc'])
-        # Use a button as a "Launch" link to track clicks
-        if st.button(f"Launch {tool['name']}", key=f"btn_{i}"):
-            tool['launches'] += 1
-            save_tools(st.session_state.tools)
-            st.link_button("Go to App", tool['url'])
-        st.caption(f"Total Launches: {tool['launches']}")
+pg = st.navigation(nav_pages, position="sidebar")
+pg.run()
