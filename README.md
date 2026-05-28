@@ -8,6 +8,7 @@ Internal Streamlit marketplace for AI tools built by the team: gallery, likes, r
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+# includes Authlib (required for Google sign-in via st.login)
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 # Edit secrets.toml — for local dev set DEV_SKIP_AUTH = "true" (persona login: Teammate 1, etc.)
 streamlit run app.py

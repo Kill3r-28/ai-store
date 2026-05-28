@@ -72,51 +72,8 @@ def _try_streamlit_oidc() -> bool:
     return False
 
 
-def _show_test_persona_login(*, oauth_pending: bool = False) -> None:
-    from lib.formatting import bold, rich
-
-    st.title("NxtWave AI Tools Marketplace")
-    if oauth_pending:
-        st.info(
-            "Google sign-in is not configured yet (add real `client_id` and `client_secret` under "
-            "`[auth]` in `.streamlit/secrets.toml`). Use a test profile below for now."
-        )
-    else:
-        rich(f"Sign in as a {bold('test profile')} to use the marketplace locally.")
-
-    personas = get_login_personas()
-    labels = [persona_label(p) for p in personas]
-    default_idx = 0
-    for i, p in enumerate(personas):
-        if p["id"] == "teammate_1":
-            default_idx = i
-            break
-
-    picked_label = st.selectbox("Choose profile", labels, index=default_idx, key="persona_login_pick")
-    picked = personas[labels.index(picked_label)]
-
-    if st.button("Continue", type="primary", use_container_width=True):
-        _set_user(picked["email"], picked["name"])
-        st.session_state["active_persona_id"] = picked["id"]
-        st.rerun()
-    st.stop()
-
-
-def _show_google_login() -> None:
-    from lib.formatting import bold, rich
-
-    st.title("NxtWave AI Tools Marketplace")
-    rich(f"Sign in with your {bold('NxtWave Google Workspace')} account to browse internal tools.")
-    try:
-        st.login()
-    except Exception as e:
-        st.error(f"Login failed: {e}")
-        st.caption("Check `[auth]` settings in `.streamlit/secrets.toml` and the redirect URI in Google Cloud.")
-    st.stop()
-
-
 def logout_user() -> None:
-    for key in ("authenticated", "user_email", "user_name", "active_persona_id"):
+    for key in ("authenticated", "user_email", "user_name", "active_persona_id", "trigger_google_login"):
         st.session_state.pop(key, None)
     if dev_skip_auth() or test_personas_enabled() or not oauth_is_configured():
         st.session_state["dev_logged_out"] = True
@@ -132,21 +89,24 @@ def logout_user() -> None:
 
 
 def require_login() -> tuple[str, str]:
-    """Gate pages; returns (email, name). Blocks until authenticated."""
+    """Gate pages; returns (email, name). Blocks on home until authenticated."""
+    from lib.home import show_google_home, show_persona_home
+
     use_personas = dev_skip_auth() or test_personas_enabled() or not oauth_is_configured()
 
     if use_personas:
         email, name = get_user()
         if email and name:
             return email, name
-        _show_test_persona_login(oauth_pending=not oauth_is_configured() and not dev_skip_auth())
+        show_persona_home(oauth_pending=not oauth_is_configured() and not dev_skip_auth())
 
     if _try_streamlit_oidc():
         email, name = get_user()
         if email and name:
+            st.session_state.pop("trigger_google_login", None)
             return email, name
 
-    _show_google_login()
+    show_google_home()
 
 
 def render_user_sidebar() -> None:

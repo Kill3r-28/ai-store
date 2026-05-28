@@ -14,10 +14,10 @@ from lib.routes import ADMIN_SCRIPT, GALLERY_SCRIPT, REGISTER_SCRIPT
 from lib.theme import apply_app_theme
 
 st.set_page_config(
-    page_title="NxtWave AI Tools Marketplace",
+    page_title="NxtWave Tool Library",
     page_icon="🚀",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 apply_app_theme()
 init_db()
