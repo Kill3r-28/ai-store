@@ -254,3 +254,9 @@ def set_doc_cache(tool_id: str, doc_type: str, content: str) -> None:
 def clear_doc_cache(tool_id: str) -> None:
     with get_conn() as conn:
         conn.execute("DELETE FROM doc_cache WHERE tool_id = ?", (tool_id,))
+
+
+def delete_tool(tool_id: str) -> bool:
+    with get_conn() as conn:
+        cur = conn.execute("DELETE FROM tools WHERE id = ?", (tool_id,))
+        return cur.rowcount > 0

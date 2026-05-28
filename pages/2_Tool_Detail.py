@@ -1,7 +1,8 @@
 import streamlit as st
 
+from lib.auth import is_admin, render_sidebar_status
 from lib.config import INFRA_CHECKLIST_KEYS, INFRA_RECOMMENDATIONS
-from lib.db import get_tool, init_db
+from lib.db import delete_tool, get_tool, init_db
 from lib.github_docs import (
     get_tool_future_plans,
     get_tool_readme,
@@ -15,6 +16,7 @@ from lib.ui import TYPE_LABELS, tool_launch_url
 
 apply_app_theme()
 init_db()
+render_sidebar_status()
 
 tool_id = st.query_params.get("tool")
 if not tool_id:
@@ -108,3 +110,24 @@ with col_a:
 with col_b:
     if st.button("← Back to Gallery", key="back_footer"):
         st.switch_page(GALLERY_SCRIPT)
+
+if is_admin():
+    st.divider()
+    st.markdown(f"{bold('Admin')}", unsafe_allow_html=True)
+    confirm_key = f"confirm_delete_{tool.id}"
+    if st.session_state.get(confirm_key):
+        st.warning(f"Delete **{tool.name}** permanently? This cannot be undone.")
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Yes, delete tool", type="primary", key=f"yes_del_{tool.id}"):
+                delete_tool(tool.id)
+                st.session_state.pop(confirm_key, None)
+                st.success("Tool deleted.")
+                st.switch_page(GALLERY_SCRIPT)
+        with c2:
+            if st.button("Cancel", key=f"no_del_{tool.id}"):
+                st.session_state.pop(confirm_key, None)
+                st.rerun()
+    elif st.button("Delete tool", key=f"del_{tool.id}"):
+        st.session_state[confirm_key] = True
+        st.rerun()

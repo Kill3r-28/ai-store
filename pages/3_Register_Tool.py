@@ -1,5 +1,6 @@
 import streamlit as st
 
+from lib.auth import current_user, render_sidebar_status
 from lib.config import (
     INFRA_CHECKLIST_KEYS,
     INFRA_RECOMMENDATIONS,
@@ -9,11 +10,19 @@ from lib.config import (
 from lib.db import create_tool, get_tool, init_db, normalize_tag, update_tool
 from lib.formatting import bold, bold_line, rich
 from lib.models import Tool
-from lib.routes import DETAIL_SCRIPT
+from lib.routes import DETAIL_SCRIPT, LOGIN_SCRIPT
 from lib.theme import apply_app_theme
 
 apply_app_theme()
 init_db()
+render_sidebar_status()
+
+if current_user() is None:
+    st.title("Sign in to register a tool")
+    st.write("Adding a tool requires a NxtWave Google account or the admin login.")
+    if st.button("Go to sign-in", type="primary"):
+        st.switch_page(LOGIN_SCRIPT)
+    st.stop()
 
 edit_id = st.query_params.get("edit")
 existing: Tool | None = get_tool(edit_id) if edit_id else None
@@ -106,14 +115,17 @@ with st.form("register_tool", clear_on_submit=not existing):
     )
 
     bold_line("Submitter")
-    submitter_name = st.text_input(
-        "Your name *",
-        value=existing.submitter_name if existing else "",
-    )
-    submitter_email = st.text_input(
-        "Your email (optional)",
-        value=existing.submitter_email if existing else "",
-    )
+    _u = current_user()
+    _default_name = ""
+    _default_email = ""
+    if existing:
+        _default_name = existing.submitter_name
+        _default_email = existing.submitter_email
+    elif _u and _u.role == "google":
+        _default_name = _u.name
+        _default_email = _u.email
+    submitter_name = st.text_input("Your name *", value=_default_name)
+    submitter_email = st.text_input("Your email (optional)", value=_default_email)
 
     app_url = ""
     github_repo = ""

@@ -3,3 +3,4 @@
 GALLERY_SCRIPT = "pages/1_Gallery.py"
 DETAIL_SCRIPT = "pages/2_Tool_Detail.py"
 REGISTER_SCRIPT = "pages/3_Register_Tool.py"
+LOGIN_SCRIPT = "pages/4_Login.py"

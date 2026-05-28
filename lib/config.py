@@ -36,3 +36,43 @@ def get_secret(key: str, default: str | None = None) -> str | None:
     except Exception:
         pass
     return os.environ.get(key, default)
+
+
+def allowed_email_domains() -> list[str]:
+    raw = get_secret("ALLOWED_EMAIL_DOMAINS", "nxtwave.co.in") or ""
+    domains = [d.strip().lstrip("@").lower() for d in raw.split(",") if d.strip()]
+    return domains or ["nxtwave.co.in"]
+
+
+def admin_credentials() -> tuple[str, str] | None:
+    username = (get_secret("ADMIN_USERNAME") or "").strip()
+    password = get_secret("ADMIN_PASSWORD") or ""
+    if not username or not password:
+        return None
+    return username, password
+
+
+def oauth_is_configured() -> bool:
+    try:
+        import streamlit as st
+    except ImportError:
+        return False
+    if not hasattr(st, "login"):
+        return False
+    try:
+        auth = st.secrets.get("auth", {})
+    except Exception:
+        return False
+    if not auth:
+        return False
+    client_id = str(auth.get("client_id", "")).strip()
+    client_secret = str(auth.get("client_secret", "")).strip()
+    cookie_secret = str(auth.get("cookie_secret", "")).strip()
+    if not client_id or not client_secret or len(cookie_secret) < 16:
+        return False
+    placeholders = ("YOUR_GOOGLE", "your_google", "changeme", "PASTE_")
+    if any(p in client_id for p in placeholders):
+        return False
+    if any(p in client_secret for p in placeholders):
+        return False
+    return True

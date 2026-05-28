@@ -1,5 +1,6 @@
 import streamlit as st
 
+from lib.auth import render_sidebar_status
 from lib.config import STARTER_USE_CASE_TAGS, TOOL_TYPES
 from lib.db import get_all_tags, init_db, list_tools
 from lib.theme import apply_app_theme
@@ -20,6 +21,7 @@ def _gallery_tag_order(tools: list) -> list[str]:
 
 apply_app_theme()
 init_db()
+render_sidebar_status()
 
 st.title("NxtWave AI Tools Marketplace")
 st.caption("Tools are grouped by hashtag. Pick a tag in the sidebar to focus on one group.")
