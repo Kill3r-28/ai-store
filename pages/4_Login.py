@@ -1,23 +1,25 @@
 import streamlit as st
 
-from lib.auth import current_user, login_as_admin, sync_google_user
+from lib.auth import (
+    current_user,
+    login_as_admin,
+    render_sidebar_status,
+    sync_google_user,
+)
 from lib.config import admin_credentials, allowed_email_domains, oauth_is_configured
 from lib.routes import GALLERY_SCRIPT
 from lib.theme import apply_app_theme
 
 apply_app_theme()
 
-# If a Google sign-in just completed, finish syncing then bounce home.
-if sync_google_user():
+# Pick up a just-completed Google sign-in before deciding what to render.
+sync_google_user()
+
+# If the user is already signed in (Google or admin), bounce them to the Gallery.
+if current_user() is not None:
     st.switch_page(GALLERY_SCRIPT)
 
-user = current_user()
-if user:
-    st.title("Already signed in")
-    st.write(f"Signed in as **{user.name}** ({user.email}).")
-    if st.button("Back to Gallery", type="primary"):
-        st.switch_page(GALLERY_SCRIPT)
-    st.stop()
+render_sidebar_status()
 
 st.title("Sign in")
 st.caption("Pick how you want to continue.")
@@ -59,7 +61,6 @@ with admin_col:
                 if submitted:
                     if login_as_admin(username, password):
                         st.session_state.pop("show_admin_form", None)
-                        st.success("Signed in as admin.")
                         st.switch_page(GALLERY_SCRIPT)
                     else:
                         st.error("Invalid username or password.")

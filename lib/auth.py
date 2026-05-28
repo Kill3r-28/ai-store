@@ -53,10 +53,13 @@ def email_domain_allowed(email: str) -> bool:
 
 
 def sync_google_user() -> bool:
-    """Copy st.user into session after a successful Google sign-in. Returns True on success."""
+    """Copy st.user into session after a successful Google sign-in. Returns True on first sync."""
     if not oauth_is_configured():
         return False
     if not getattr(st.user, "is_logged_in", False):
+        return False
+    existing = st.session_state.get("auth_user")
+    if existing and existing.get("role") == "google":
         return False
 
     email = (getattr(st.user, "email", "") or "").strip()

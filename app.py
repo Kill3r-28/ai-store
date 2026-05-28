@@ -7,7 +7,6 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st
 
-from lib.auth import current_user
 from lib.db import init_db
 from lib.routes import GALLERY_SCRIPT, LOGIN_SCRIPT, REGISTER_SCRIPT
 from lib.theme import apply_app_theme
@@ -23,10 +22,7 @@ init_db()
 
 gallery = st.Page(GALLERY_SCRIPT, title="Gallery", icon="🛍️", default=True)
 register = st.Page(REGISTER_SCRIPT, title="Register", icon="➕")
-nav_pages = [gallery, register]
+login = st.Page(LOGIN_SCRIPT, title="Login", icon="🔑")
 
-if current_user() is None:
-    nav_pages.append(st.Page(LOGIN_SCRIPT, title="Login", icon="🔑"))
-
-pg = st.navigation(nav_pages, position="sidebar")
+pg = st.navigation([gallery, register, login], position="sidebar")
 pg.run()
