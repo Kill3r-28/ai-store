@@ -69,8 +69,8 @@ with tab_overview:
             else f"https://github.com/{tool.github_repo}"
         )
         st.link_button("GitHub repository", repo_url)
-    if tool.app_url and tool.tool_type == "streamlit":
-        st.link_button("Streamlit app", tool.app_url)
+    if tool.app_url and tool.tool_type == "web_app":
+        st.link_button("Open web app", tool.app_url)
     if tool.sheet_url:
         st.link_button("Google Sheet", tool.sheet_url)
 

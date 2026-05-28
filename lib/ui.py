@@ -8,14 +8,14 @@ from lib.routes import DETAIL_SCRIPT
 
 
 TYPE_LABELS = {
-    "streamlit": "Streamlit",
+    "web_app": "Web app",
     "github_only": "GitHub",
     "apps_script": "Apps Script",
 }
 
 
 def tool_launch_url(tool: Tool) -> str | None:
-    if tool.tool_type == "streamlit":
+    if tool.tool_type == "web_app":
         return tool.app_url
     if tool.tool_type == "github_only" and tool.github_repo:
         repo = tool.github_repo.strip()

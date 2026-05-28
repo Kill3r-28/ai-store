@@ -41,7 +41,7 @@ class Tool:
             short_desc=row.get("short_desc") or "",
             submitter_name=row.get("submitter_name") or "",
             submitter_email=row.get("submitter_email") or "",
-            tool_type=row.get("tool_type") or "streamlit",
+            tool_type=row.get("tool_type") or "web_app",
             app_url=row.get("app_url"),
             github_repo=row.get("github_repo"),
             sheet_url=row.get("sheet_url"),

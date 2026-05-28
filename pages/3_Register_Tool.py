@@ -29,7 +29,7 @@ existing: Tool | None = get_tool(edit_id) if edit_id else None
 
 st.title("Edit tool" if existing else "Register a new tool")
 
-default_type = existing.tool_type if existing else "streamlit"
+default_type = existing.tool_type if existing else "web_app"
 type_index = TOOL_TYPES.index(default_type) if default_type in TOOL_TYPES else 0
 tool_type = st.selectbox(
     "Tool type *",
@@ -131,12 +131,13 @@ with st.form("register_tool", clear_on_submit=not existing):
     github_repo = ""
     sheet_url = ""
 
-    if tool_type == "streamlit":
-        bold_line("Streamlit hosting")
+    if tool_type == "web_app":
+        bold_line("Web app hosting")
         app_url = st.text_input(
-            "Streamlit app URL *",
+            "App URL *",
             value=existing.app_url or "" if existing else "",
             placeholder="https://your-app.streamlit.app",
+            help="Public URL where the tool is deployed — Streamlit, Netlify, Vercel, Render, a custom domain, anything reachable in a browser.",
         )
         github_repo = st.text_input(
             "GitHub repo * (org/repo or full URL)",
@@ -216,11 +217,11 @@ if submitted:
     if not future_plans_fallback.strip():
         errors.append("future_plans.md content is required.")
 
-    if tool_type == "streamlit":
+    if tool_type == "web_app":
         if not app_url.strip():
-            errors.append("Streamlit app URL is required.")
+            errors.append("App URL is required.")
         if not github_repo.strip():
-            errors.append("GitHub repo is required for Streamlit tools.")
+            errors.append("GitHub repo is required for web app tools.")
     elif tool_type == "github_only":
         if not github_repo.strip():
             errors.append("GitHub repo is required.")

@@ -9,7 +9,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 DOC_CACHE_TTL_SECONDS = 3600
 
-TOOL_TYPES = ("streamlit", "github_only", "apps_script")
+TOOL_TYPES = ("web_app", "github_only", "apps_script")
 
 STARTER_USE_CASE_TAGS = [
     "content-gen",

@@ -62,7 +62,7 @@ def init_db() -> None:
                 short_desc TEXT NOT NULL DEFAULT '',
                 submitter_name TEXT NOT NULL DEFAULT '',
                 submitter_email TEXT NOT NULL DEFAULT '',
-                tool_type TEXT NOT NULL DEFAULT 'streamlit',
+                tool_type TEXT NOT NULL DEFAULT 'web_app',
                 app_url TEXT,
                 github_repo TEXT,
                 sheet_url TEXT,
@@ -90,6 +90,7 @@ def init_db() -> None:
             CREATE INDEX IF NOT EXISTS idx_tools_cluster ON tools(cluster_id);
             """
         )
+        conn.execute("UPDATE tools SET tool_type = 'web_app' WHERE tool_type = 'streamlit'")
 
 
 def list_tools(
@@ -160,7 +161,7 @@ def create_tool(data: dict[str, Any]) -> Tool:
                 data.get("short_desc", ""),
                 data.get("submitter_name", ""),
                 data.get("submitter_email", ""),
-                data.get("tool_type", "streamlit"),
+                data.get("tool_type", "web_app"),
                 data.get("app_url"),
                 data.get("github_repo"),
                 data.get("sheet_url"),
