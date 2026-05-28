@@ -44,9 +44,9 @@ def get_secret(key: str, default: str | None = None) -> str | None:
 
 
 def allowed_email_domains() -> list[str]:
-    raw = get_secret("ALLOWED_EMAIL_DOMAINS", "nxtwave.com")
+    raw = get_secret("ALLOWED_EMAIL_DOMAINS", "nxtwave.co.in")
     if not raw:
-        return ["nxtwave.com"]
+        return ["nxtwave.co.in"]
     return [d.strip().lstrip("@").lower() for d in raw.split(",") if d.strip()]
 
 
@@ -75,8 +75,17 @@ def oauth_is_configured() -> bool:
         return False
     if not auth:
         return False
-    client_id = str(auth.get("client_id", "")).strip()
-    client_secret = str(auth.get("client_secret", "")).strip()
+    def _clean(v: object) -> str:
+        s = str(v or "").strip()
+        if len(s) >= 2 and s[0] == s[-1] and s[0] in ('"', "'"):
+            return s[1:-1].strip()
+        return s
+
+    client_id = _clean(auth.get("client_id", ""))
+    client_secret = _clean(auth.get("client_secret", ""))
+    cookie_secret = _clean(auth.get("cookie_secret", ""))
+    if not cookie_secret or len(cookie_secret) < 16:
+        return False
     if not client_id or not client_secret:
         return False
     placeholders = ("YOUR_GOOGLE", "your_google", "changeme", "xxxxxxxx")

@@ -33,11 +33,13 @@ your-repo/
 
 ## Google OAuth (production)
 
+See **[docs/DEPLOY_OAUTH.md](docs/DEPLOY_OAUTH.md)** for Streamlit Cloud secrets (copy-paste template).
+
 1. Create a **Web application** OAuth client in Google Cloud Console.
-2. Add redirect URI: `https://<your-host>/oauth2callback`
-3. Copy client ID/secret into `.streamlit/secrets.toml` under `[auth]`.
-4. Set `ALLOWED_EMAIL_DOMAINS` to your company domain(s).
-5. Set `DEV_SKIP_AUTH = "false"`.
+2. Add redirect URIs: `http://localhost:8501/oauth2callback` and `https://<your-app>.streamlit.app/oauth2callback`
+3. On **Streamlit Cloud**, paste secrets from `docs/streamlit-cloud-secrets.toml` (not the local gitignored file).
+4. Set `APP_PUBLIC_URL`, `ALLOWED_EMAIL_DOMAINS`, and `DEV_SKIP_AUTH = "false"`.
+5. Run `python scripts/verify_oauth.py` locally to validate credentials before deploy.
 
 ## Securing linked tools
 
