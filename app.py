@@ -7,6 +7,7 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st
 
+from lib.auth import sync_google_user
 from lib.db import init_db
 from lib.routes import GALLERY_SCRIPT, LOGIN_SCRIPT, REGISTER_SCRIPT
 from lib.theme import apply_app_theme
@@ -19,6 +20,7 @@ st.set_page_config(
 )
 apply_app_theme()
 init_db()
+sync_google_user()
 
 gallery = st.Page(GALLERY_SCRIPT, title="Gallery", icon="🛍️", default=True)
 register = st.Page(REGISTER_SCRIPT, title="Register", icon="➕")
