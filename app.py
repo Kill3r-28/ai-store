@@ -7,6 +7,11 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st
 
+from lib.auth_bootstrap import bootstrap_auth_secrets
+
+# Patch [auth] (redirect_uri, trimming) as soon as Streamlit secrets are available.
+bootstrap_auth_secrets()
+
 from lib.auth import require_login
 from lib.config import is_admin
 from lib.db import init_db

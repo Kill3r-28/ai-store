@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from lib.auth import render_oauth_config_errors, sync_user_from_streamlit_oidc
+from lib.auth_bootstrap import auth_config_summary
 from lib.personas import get_login_personas, persona_label
 
 
@@ -65,10 +67,16 @@ def _render_home_shell(title: str, subtitle: str) -> None:
 
 def show_google_home() -> None:
     """Branded home with Continue with Google → st.login()."""
+    if render_oauth_config_errors():
+        return
+
     _render_home_shell(
         "NxtWave Tool Library",
         "Discover, share, and launch internal AI tools built by your team.",
     )
+
+    if sync_user_from_streamlit_oidc():
+        st.rerun()
 
     _, btn_col, _ = st.columns([1, 1.2, 1])
     with btn_col:
@@ -78,18 +86,18 @@ def show_google_home() -> None:
             use_container_width=True,
             key="home_google_cta",
         ):
-            st.session_state["trigger_google_login"] = True
-            st.rerun()
-
-    if st.session_state.get("trigger_google_login"):
-        try:
-            st.login()
-        except Exception as e:
-            st.error(f"Login failed: {e}")
-            st.caption(
-                "Check `[auth]` in `.streamlit/secrets.toml`, install Authlib, "
-                "and verify the redirect URI in Google Cloud."
-            )
+            try:
+                st.login()
+            except Exception as exc:
+                st.error(f"Login failed: {exc}")
+                summary = auth_config_summary()
+                if summary:
+                    with st.expander("Auth debug (no secrets shown)"):
+                        st.json(summary)
+                st.caption(
+                    "On Streamlit Cloud, set **APP_PUBLIC_URL** and `[auth]` in **Settings → Secrets**, "
+                    "then reboot. See `docs/DEPLOY_OAUTH.md`."
+                )
 
     st.stop()
 
@@ -105,8 +113,8 @@ def show_persona_home(*, oauth_pending: bool = False) -> None:
 
     if oauth_pending:
         st.info(
-            "Add real `client_id` and `client_secret` under `[auth]` in `.streamlit/secrets.toml` "
-            "to enable Continue with Google."
+            "Add `client_id` and `client_secret` under `[auth]` in secrets, plus `APP_PUBLIC_URL` on Streamlit Cloud. "
+            "See `docs/DEPLOY_OAUTH.md`."
         )
 
     _, form_col, _ = st.columns([1, 1.2, 1])
@@ -124,7 +132,6 @@ def show_persona_home(*, oauth_pending: bool = False) -> None:
 
             _set_user(picked["email"], picked["name"])
             st.session_state["active_persona_id"] = picked["id"]
-            st.session_state.pop("trigger_google_login", None)
             st.rerun()
 
     st.stop()
