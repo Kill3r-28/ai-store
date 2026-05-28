@@ -10,8 +10,8 @@ class Tool:
     id: str
     name: str
     short_desc: str
-    owner_email: str
-    owner_name: str
+    submitter_name: str
+    submitter_email: str
     tool_type: str
     app_url: str | None = None
     github_repo: str | None = None
@@ -26,14 +26,9 @@ class Tool:
     launches: int = 0
     created_at: str | None = None
     updated_at: str | None = None
-    like_count: int = 0
-    user_liked: bool = False
-    avg_rating: float | None = None
-    rating_count: int = 0
 
     @classmethod
-    def from_row(cls, row: dict[str, Any], *, user_liked: bool = False, like_count: int = 0,
-                 avg_rating: float | None = None, rating_count: int = 0) -> Tool:
+    def from_row(cls, row: dict[str, Any]) -> Tool:
         tags = row.get("use_case_tags") or "[]"
         if isinstance(tags, str):
             tags = json.loads(tags)
@@ -44,8 +39,8 @@ class Tool:
             id=row["id"],
             name=row["name"],
             short_desc=row.get("short_desc") or "",
-            owner_email=row.get("owner_email") or "",
-            owner_name=row.get("owner_name") or "",
+            submitter_name=row.get("submitter_name") or "",
+            submitter_email=row.get("submitter_email") or "",
             tool_type=row.get("tool_type") or "streamlit",
             app_url=row.get("app_url"),
             github_repo=row.get("github_repo"),
@@ -60,31 +55,4 @@ class Tool:
             launches=row.get("launches") or 0,
             created_at=row.get("created_at"),
             updated_at=row.get("updated_at"),
-            like_count=like_count,
-            user_liked=user_liked,
-            avg_rating=avg_rating,
-            rating_count=rating_count,
-        )
-
-
-@dataclass
-class Comment:
-    id: int
-    tool_id: str
-    user_email: str
-    user_name: str
-    body: str
-    status: str
-    created_at: str
-
-    @classmethod
-    def from_row(cls, row: dict[str, Any]) -> Comment:
-        return cls(
-            id=row["id"],
-            tool_id=row["tool_id"],
-            user_email=row["user_email"],
-            user_name=row["user_name"],
-            body=row["body"],
-            status=row.get("status") or "open",
-            created_at=row["created_at"],
         )

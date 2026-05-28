@@ -4,8 +4,6 @@ import streamlit as st
 
 BG = "#343231"
 BG_SIDEBAR = "#2e2c2b"
-BG_PANEL = "#3d3b39"
-BORDER = "#4a4846"
 
 
 def apply_app_theme() -> None:
@@ -29,10 +27,6 @@ def apply_app_theme() -> None:
         [data-testid="stToolbar"] {{
             background-color: rgba(52, 50, 49, 0) !important;
         }}
-        [data-testid="stSidebar"] .user-panel {{
-            background: {BG_PANEL};
-            border: 1px solid {BORDER};
-        }}
         .hashtag-compact-wrap {{
             max-width: 420px;
         }}
@@ -48,23 +42,6 @@ def apply_app_theme() -> None:
         }}
         .hashtag-compact-wrap input {{
             font-size: 0.9rem;
-        }}
-        .user-panel {{
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            margin-bottom: 0.75rem;
-        }}
-        .user-panel .user-name {{
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin: 0;
-            color: #f5f5f5;
-        }}
-        .user-panel .user-email {{
-            font-size: 0.75rem;
-            opacity: 0.75;
-            margin: 0.15rem 0 0 0;
-            color: #e5e5e5;
         }}
         </style>
         """,

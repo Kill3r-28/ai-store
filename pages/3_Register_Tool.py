@@ -1,6 +1,5 @@
 import streamlit as st
 
-from lib.auth import require_login, render_user_sidebar
 from lib.config import (
     INFRA_CHECKLIST_KEYS,
     INFRA_RECOMMENDATIONS,
@@ -15,15 +14,9 @@ from lib.theme import apply_app_theme
 
 apply_app_theme()
 init_db()
-user_email, user_name = require_login()
-render_user_sidebar()
 
 edit_id = st.query_params.get("edit")
-existing: Tool | None = get_tool(edit_id, user_email) if edit_id else None
-
-if existing and existing.owner_email.lower() != user_email.lower():
-    st.error("You can only edit tools you own.")
-    st.stop()
+existing: Tool | None = get_tool(edit_id) if edit_id else None
 
 st.title("Edit tool" if existing else "Register a new tool")
 
@@ -112,6 +105,16 @@ with st.form("register_tool", clear_on_submit=not existing):
         value=existing.short_desc if existing else "",
     )
 
+    bold_line("Submitter")
+    submitter_name = st.text_input(
+        "Your name *",
+        value=existing.submitter_name if existing else "",
+    )
+    submitter_email = st.text_input(
+        "Your email (optional)",
+        value=existing.submitter_email if existing else "",
+    )
+
     app_url = ""
     github_repo = ""
     sheet_url = ""
@@ -181,10 +184,6 @@ with st.form("register_tool", clear_on_submit=not existing):
         "Automated tests",
         value=existing_check.get("has_tests", False),
     )
-    checklist["has_tool_auth"] = st.checkbox(
-        "Secure login enabled on the tool",
-        value=existing_check.get("has_tool_auth", False),
-    )
 
     submitted = st.form_submit_button("Save tool" if existing else "Register tool", type="primary")
 
@@ -196,6 +195,8 @@ if submitted:
         errors.append("Tool name is required.")
     if not short_desc.strip():
         errors.append("Short description is required.")
+    if not submitter_name.strip():
+        errors.append("Your name is required.")
     if not selected_tags:
         errors.append("Add at least one use case hashtag.")
     if not readme_fallback.strip():
@@ -226,6 +227,8 @@ if submitted:
         payload = {
             "name": name.strip(),
             "short_desc": short_desc.strip(),
+            "submitter_name": submitter_name.strip(),
+            "submitter_email": submitter_email.strip(),
             "tool_type": tool_type,
             "app_url": app_url.strip() or None,
             "github_repo": github_repo.strip() or None,
@@ -236,8 +239,6 @@ if submitted:
             "infra_checklist": checklist,
             "readme_fallback": readme_fallback.strip(),
             "future_plans_fallback": future_plans_fallback.strip(),
-            "owner_email": user_email,
-            "owner_name": user_name,
         }
         if existing:
             update_tool(existing.id, payload)

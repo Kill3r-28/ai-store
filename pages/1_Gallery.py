@@ -1,6 +1,5 @@
 import streamlit as st
 
-from lib.auth import require_login, render_user_sidebar
 from lib.config import STARTER_USE_CASE_TAGS, TOOL_TYPES
 from lib.db import get_all_tags, init_db, list_tools
 from lib.theme import apply_app_theme
@@ -21,8 +20,6 @@ def _gallery_tag_order(tools: list) -> list[str]:
 
 apply_app_theme()
 init_db()
-user_email, user_name = require_login()
-render_user_sidebar()
 
 st.title("NxtWave AI Tools Marketplace")
 st.caption("Tools are grouped by hashtag. Pick a tag in the sidebar to focus on one group.")
@@ -43,14 +40,11 @@ with st.sidebar:
         sidebar_tags,
         format_func=lambda x: "All hashtags" if x == "all" else f"#{x}",
     )
-    my_tools = st.checkbox("My tools only")
 
 tools = list_tools(
-    user_email=user_email,
     search=search or None,
     tool_type=tool_type if tool_type != "all" else None,
     tag=tag if tag != "all" else None,
-    owner_only=my_tools,
 )
 
 if not tools:
@@ -73,7 +67,7 @@ for hashtag in tags_to_show:
         shown_ids.add(t.id)
         with cols[i % 3]:
             with st.container(border=True):
-                render_tool_card(t, user_email, key_prefix=f"{hashtag}_{i}")
+                render_tool_card(t, key_prefix=f"{hashtag}_{i}")
     st.divider()
 
 other = [t for t in tools if t.id not in shown_ids]
@@ -83,4 +77,4 @@ if other:
     for i, t in enumerate(other):
         with cols[i % 3]:
             with st.container(border=True):
-                render_tool_card(t, user_email, key_prefix=f"other_{i}")
+                render_tool_card(t, key_prefix=f"other_{i}")
