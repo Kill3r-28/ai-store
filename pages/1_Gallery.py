@@ -1,6 +1,6 @@
 import streamlit as st
 
-from lib.auth import render_sidebar_status
+from lib.auth import is_admin, render_sidebar_status
 from lib.config import STARTER_USE_CASE_TAGS, TOOL_TYPES
 from lib.db import get_all_tags, init_db, list_tools
 from lib.theme import apply_app_theme
@@ -48,6 +48,7 @@ tools = list_tools(
     tool_type=tool_type if tool_type != "all" else None,
     tag=tag if tag != "all" else None,
 )
+admin = is_admin()
 
 if not tools:
     st.info("No tools match your filters. Be the first to register one!")
@@ -69,7 +70,7 @@ for hashtag in tags_to_show:
         shown_ids.add(t.id)
         with cols[i % 3]:
             with st.container(border=True):
-                render_tool_card(t, key_prefix=f"{hashtag}_{i}")
+                render_tool_card(t, key_prefix=f"{hashtag}_{i}", is_admin=admin)
     st.divider()
 
 other = [t for t in tools if t.id not in shown_ids]
@@ -79,4 +80,4 @@ if other:
     for i, t in enumerate(other):
         with cols[i % 3]:
             with st.container(border=True):
-                render_tool_card(t, key_prefix=f"other_{i}")
+                render_tool_card(t, key_prefix=f"other_{i}", is_admin=admin)
