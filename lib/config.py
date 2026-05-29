@@ -65,9 +65,10 @@ def oauth_is_configured() -> bool:
         return False
     if not auth:
         return False
-    client_id = str(auth.get("client_id", "")).strip()
-    client_secret = str(auth.get("client_secret", "")).strip()
     cookie_secret = str(auth.get("cookie_secret", "")).strip()
+    provider = auth.get("google") or {}
+    client_id = str(provider.get("client_id", "")).strip()
+    client_secret = str(provider.get("client_secret", "")).strip()
     if not client_id or not client_secret or len(cookie_secret) < 16:
         return False
     placeholders = ("YOUR_GOOGLE", "your_google", "changeme", "PASTE_")

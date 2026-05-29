@@ -37,7 +37,7 @@ with google_col:
         )
     elif st.button("Login with Google account", key="google_btn", use_container_width=True):
         try:
-            st.login()
+            st.login("google")
         except Exception as exc:
             st.error(f"Google sign-in failed: {exc}")
 
